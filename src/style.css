@@ -1,3 +1,39 @@
+/* src/style.css */
 .sidebar-divider {
   border-right: 1px solid #ccc;
+}
+
+.sidebar {
+  padding-top: 1rem;
+}
+
+.nav-item {
+  margin-bottom: 0.5rem;
+}
+
+.nav-link {
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  transition: color 0.3s;
+}
+
+.nav-link:hover {
+  color: #ffc107;
+  text-decoration: none;
+}
+
+.main-content {
+  padding: 2rem;
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+  background-color: #1a1a1a;
+  color: #ffffff;
+}
+
+h1 {
+  margin-bottom: 1.5rem;
+  color: #ffffff;
 }

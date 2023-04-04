@@ -15,6 +15,12 @@ import {
 } from '@mui/material';
 import { styled } from '@mui/system';
 import { CSVDataContext } from '../CSVDataContext';
+import { getStorage, ref, listAll, uploadBytes, getDownloadURL } from "firebase/storage";
+import { fetchDatasetNames } from "../utils/firebaseUtils";
+import firebaseApp from "../firebase";
+import Papa from 'papaparse';
+
+
 
 const CustomInput = styled(Input)(({ theme }) => ({
   display: 'none',
@@ -61,38 +67,36 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 }));
 
 const Data = () => {
-  const { csvData, setCsvData } = useContext(CSVDataContext);
+  const { csvData } = useContext(CSVDataContext);
   const [previewData, setPreviewData] = useState(null);
-  const [datasets, setDatasets] = useState([]);
+  const [datasets, setDatasets] = useState([]);  
 
-
-  const handleFileUpload = (event) => {
+  const handleFileUpload = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const data = e.target.result;
-      const lines = data.split('\n');
-      const parsedData = lines.map((line) => line.split(','));
-      setCsvData(parsedData);
-      setPreviewData(parsedData);
-      // Save the data to local storage
-      localStorage.setItem(file.name, JSON.stringify(parsedData));
+    // Upload the file to Firebase Storage
+    const storage = getStorage(firebaseApp);
+    const storageRef = ref(storage, 'datasets/' + file.name);
+    const snapshot = await uploadBytes(storageRef, file);
+    console.log('Uploaded a blob or file!', snapshot);
 
-    };
+    // Use Papa Parse to read and parse the CSV file
+    Papa.parse(file, {
+      preview: 100, // Limit the preview to 100 rows
+      complete: (results) => {
+        setPreviewData(results.data);
+      },
+    });
 
-    reader.readAsText(file);
+    fetchDatasetNames();
+
   };
 
-
   useEffect(() => {
-    const storedDatasets = Object.keys(localStorage).filter((key) =>
-      key.endsWith('.csv')
-    );
-    setDatasets(storedDatasets);
+    fetchDatasetNames();
   }, []);
-  
+    
   return (
     <div>
       <label htmlFor="upload-csv">

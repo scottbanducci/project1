@@ -1,54 +1,114 @@
-import React, { useState, useEffect } from 'react';
-import { Button, Form } from 'react-bootstrap';
+import React, { useState, useEffect } from "react";
+import {
+  Button,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  Typography,
+  Grid,
+} from "@mui/material";
+import { fetchDatasetNames  } from "../utils/firebaseUtils";
+import axios from 'axios';
+import { fetchCSV } from "../utils/csvUtils";
+import SimpleVisualization from "../components/simpleVisualization";
+
+const fetchPreprocessedCSV = async (datasetName, algorithmName) => {
+  const response = await axios.get(`/preprocess-csv?dataset=${datasetName}&algorithm=${algorithmName}`);
+  return response.data;
+};
 
 const Training = () => {
-  const [datasets, setDatasets] = useState([]);
-  const [selectedDataset, setSelectedDataset] = useState('');
+  const [datasetNames, setDatasetNames] = useState([]);
+  const [selectedDataset, setSelectedDataset] = useState("");
+  const [selectedAlgorithm, setSelectedAlgorithm] = useState("");
+  const [showVisualization, setShowVisualization] = useState(false);
+  const [data, setData] = useState([]);
 
   useEffect(() => {
-    const storedDatasets = Object.keys(localStorage).filter((key) =>
-      key.endsWith('.csv')
-    );
-    setDatasets(storedDatasets);
+    async function fetchData() {
+      const datasets = await fetchDatasetNames();
+      setDatasetList(datasets);
+    }
+
+    fetchData();
+
   }, []);
 
-  const handleDatasetChange = (event) => {
+  const handleChange = (event) => {
     setSelectedDataset(event.target.value);
   };
 
+  const handleAlgorithmChange = (event) => {
+    setSelectedAlgorithm(event.target.value);
+  };
+
+  const handleContinue = async () => {
+    const csvData = await fetchPreprocessedCSV(selectedDataset, selectedAlgorithm);
+    setData(csvData);
+    setShowVisualization(true);
+  };
+
   return (
-    <div>
-      <h1>Training</h1>
-      <Form>
-        {/* Add more form elements for dataset selection and parameters */}
-        <Form.Group>
-          <Form.Label htmlFor="dataset">Select Dataset</Form.Label>
-          <Form.Control
-            as="select"
-            name="dataset"
-            id="dataset"
-            value={selectedDataset}
-            onChange={handleDatasetChange}
-          >
-            {datasets.map((dataset) => (
-              <option key={dataset} value={dataset}>
-                {dataset}
-              </option>
-            ))}
-          </Form.Control>
-        </Form.Group>
-        <Form.Group>
-          <Form.Label htmlFor="library">Select Library</Form.Label>
-          <Form.Control as="select" name="library" id="library">
-            <option>sklearn</option>
-            <option>PyTorch</option>
-            <option>TensorFlow</option>
-          </Form.Control>
-        </Form.Group>
-        {/* Add more form elements for other parameters */}
-        <Button onClick={() => console.log('Train the model')}>Train</Button>
-      </Form>
-    </div>
+    <Grid container spacing={2}>
+      <Grid item xs={12}>
+        <Typography variant="h4">Training</Typography>
+      </Grid>
+      {!showVisualization && (
+        <>
+          <Grid item xs={12}>
+            <FormControl fullWidth variant="outlined">
+              <InputLabel id="select-dataset-label">Select Dataset</InputLabel>
+              <Select
+                labelId="select-dataset-label"
+                value={selectedDataset}
+                onChange={handleChange}
+                label="Select Dataset"
+              >
+                {datasetNames.map((name) => (
+                  <MenuItem key={name} value={name}>
+                    {name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12}>
+            <FormControl fullWidth variant="outlined">
+              <InputLabel id="select-algorithm-label">Select Algorithm</InputLabel>
+              <Select
+                labelId="select-algorithm-label"
+                value={selectedAlgorithm}
+                onChange={handleAlgorithmChange}
+                label="Select Algorithm"
+                disabled={!selectedDataset}
+              >
+                {["Algorithm1", "Algorithm2", "Algorithm3"].map((name) => (
+                  <MenuItem key={name} value={name}>
+                    {name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12}>
+            <Button
+              variant="contained"
+              color="primary"
+              disabled={!selectedDataset || !selectedAlgorithm}
+              onClick={handleContinue}
+            >
+              Continue
+            </Button>
+          </Grid>
+        </>
+      )}
+      {showVisualization && (
+        <Grid item xs={12}>
+          <SimpleVisualization data={data} />
+        </Grid>
+      )}
+    </Grid>
   );
 };
 

@@ -13,12 +13,16 @@ import axios from 'axios';
 import { fetchCSV } from "../utils/csvUtils";
 import SimpleVisualization from "../components/simpleVisualization";
 
+const serverUrl = 'http://127.0.0.1:5000';
+
+
 const fetchPreprocessedCSV = async (datasetName, algorithmName) => {
-  const response = await axios.get(`/preprocess-csv?dataset=${datasetName}&algorithm=${algorithmName}`);
+  const response = await axios.get(`${serverUrl}/preprocess-csv?dataset=${datasetName}&algorithm=${algorithmName}`);
   return response.data;
 };
 
 const Training = () => {
+  
   const [datasetNames, setDatasetNames] = useState([]);
   const [selectedDataset, setSelectedDataset] = useState("");
   const [selectedAlgorithm, setSelectedAlgorithm] = useState("");
@@ -28,13 +32,13 @@ const Training = () => {
   useEffect(() => {
     async function fetchData() {
       const datasets = await fetchDatasetNames();
-      setDatasetList(datasets);
+      setDatasetNames(datasets);
     }
-
+  
     fetchData();
-
+  
   }, []);
-
+  
   const handleChange = (event) => {
     setSelectedDataset(event.target.value);
   };

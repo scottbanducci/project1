@@ -17,7 +17,7 @@ import { styled } from '@mui/system';
 import { CSVDataContext } from '../CSVDataContext';
 import { getStorage, ref, listAll, uploadBytes, getDownloadURL } from "firebase/storage";
 import { fetchDatasetNames } from "../utils/firebaseUtils";
-import firebaseApp from "../firebase";
+import firebaseApp from "../utils/firebase";
 import Papa from 'papaparse';
 
 

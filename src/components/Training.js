@@ -16,8 +16,8 @@ import SimpleVisualization from "../components/simpleVisualization";
 const serverUrl = 'http://127.0.0.1:5000';
 
 
-const fetchPreprocessedCSV = async (datasetName, algorithmName) => {
-  const response = await axios.get(`${serverUrl}/preprocess-csv?dataset=${datasetName}&algorithm=${algorithmName}`);
+const fetchPreprocessedCSV = async (datasetName, algorithmName, firebaseObject) => {
+  const response = await axios.get(`${serverUrl}/preprocess-csv?dataset=${datasetName}&algorithm=${algorithmName}&firebase=${firebaseObject}`);
   return response.data;
 };
 
@@ -26,6 +26,7 @@ const Training = () => {
   const [datasetNames, setDatasetNames] = useState([]);
   const [selectedDataset, setSelectedDataset] = useState("");
   const [selectedAlgorithm, setSelectedAlgorithm] = useState("");
+  const [selectedFirebaseObject, setFirebaseObject] = useState({});
   const [showVisualization, setShowVisualization] = useState(false);
   const [data, setData] = useState([]);
 

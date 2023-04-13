@@ -1,4 +1,4 @@
-import { getStorage, ref, listAll } from 'firebase/storage';
+import { getStorage, ref, listAll, getDownloadURL } from 'firebase/storage';
 import  firebaseApp  from './firebase.js';
 
 
@@ -18,4 +18,19 @@ export const fetchModelNames = async () => {
   const res = await listAll(modelsRef);
   const modelNames = res.items.map((item) => item.name.slice(0, -4)); // Remove the '.pkl' extension
   return modelNames;
+};
+
+export const downloadDatasetCSV = async (datasetName) => {
+  const storage = getStorage(firebaseApp);
+  const datasetRef = ref(storage, `${datasetName}.csv`);
+
+  try {
+    const url = await getDownloadURL(datasetRef);
+    const response = await fetch(url);
+    const data = await response.text();
+    return data;
+  } catch (error) {
+    console.error('Error downloading CSV file:', error);
+    return null;
+  }
 };
